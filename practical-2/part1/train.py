@@ -16,6 +16,8 @@
 
 import argparse
 import numpy as np
+from tqdm.auto import tqdm
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -52,10 +54,13 @@ def get_model(num_classes=100):
     #######################
 
     # Get the pretrained ResNet18 model on ImageNet from torchvision.models
-    pass
+
+    model = models.resnet18()
 
     # Randomly initialize and modify the model's last layer for CIFAR100.
-    pass
+    for param in model.parameters():
+        param.requires_grad = False # Parameters will not be updated during training
+    model.fc = nn.Linear(512, num_classes) # Replaces last FC layer
 
     #######################
     # END OF YOUR CODE    #
@@ -85,17 +90,71 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     #######################
 
     # Load the datasets
-    pass
+    train_dataset, val_dataset = get_train_validation_set(data_dir=data_dir, augmentation_name=augmentation_name)
+
+    # Adjust the batch size of the train_dataset
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size)
 
     # Initialize the optimizer (Adam) to train the last layer of the model.
-    pass
+    optimizer = torch.optim.Adam(params=model.parameters(),lr=lr)
+    loss_module = nn.CrossEntropyLoss() # Loss module or criterion
+
+    # Lists to store relevant statistics for training and validation
+    training_loss = []
+    val_accuracies = []
+
+    # Accuracy of the best model during accuracy. Set to 0 before training
+    best_val_acc = 0.0
 
     # Training loop with validation after each epoch. Save the best model.
-    pass
+    for epoch in tqdm(range(epochs)):
 
-    # Load the best model on val accuracy and return it.
-    pass
+        # Training loop
+        model.train()
 
+        train_loss = 0.0
+        for step, data in enumerate(train_dataloader):
+            inputs, labels = data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            optimizer.zero_grad()
+
+            outputs = model(inputs)
+            loss = loss_module(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            train_loss += loss.item()
+            if step % 200 == 199: # Append every 200 mini-batches
+                training_loss.append(train_loss)
+                train_loss = 0.0
+
+        # Validation loop
+        model.eval()
+
+        val_loss = 0.0
+        val_acc = 0
+        count = 0
+        for (inputs, labels) in val_dataset:
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            with torch.no_grad():
+                outputs = model(inputs)
+
+                loss = loss_module(outputs, labels)
+                val_loss += loss.item()
+                val_acc += (outputs.argmax(1) == labels).sum().item()
+                count += labels.shape[0]
+        val_acc /= count
+        val_accuracies.append(val_acc)
+
+        # Saving the best model during validation
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            torch.save(model.state_dict(), checkpoint_name)
+
+    model.load_state_dict(torch.load(checkpoint_name))
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -118,12 +177,29 @@ def evaluate_model(model, data_loader, device):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    # Set model to evaluation mode (Remember to set it back to training mode in the training loop)
-    pass
 
-    # Loop over the dataset and compute the accuracy. Return the accuracy
-    # Remember to use torch.no_grad().
-    pass
+    # Set model to evaluation mode (Remember to set it back to training mode in the training loop)
+    model.eval()
+    loss_module = nn.CrossEntropyLoss() # Loss module or criterion
+
+    # Metrics for validation
+    val_loss = 0.0
+    accuracy = 0
+    count = 0
+
+    # Validation loop. Loops over the dataset and computes the accuracy
+    for (inputs, labels) in data_loader:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        with torch.no_grad():
+            outputs = model(inputs)
+
+            loss = loss_module(outputs, labels)
+            val_loss += loss.item()
+            accuracy += (outputs.argmax(1) == labels).sum().item()
+            count += labels.shape[0]
+    accuracy /= count
 
     #######################
     # END OF YOUR CODE    #
@@ -147,23 +223,25 @@ def main(lr, batch_size, epochs, data_dir, seed, augmentation_name, test_noise):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+
     # Set the seed for reproducibility
-    pass
+    set_seed(seed)
 
     # Set the device to use for training
-    pass
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Load the model
-    pass
+    model = get_model()
 
     # Get the augmentation to use
     pass
 
     # Train the model
-    pass
+    checkpoint_name = 'best_model_validation'
+    model = train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device, augmentation_name)
 
     # Evaluate the model on the test set
-    pass
+    evaluate_model(model, get_test_set(data_dir, test_noise), device)
 
     #######################
     # END OF YOUR CODE    #
