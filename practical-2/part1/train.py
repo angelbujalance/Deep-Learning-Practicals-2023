@@ -61,7 +61,8 @@ def get_model(num_classes=100):
     for param in model.parameters():
         param.requires_grad = False # Parameters will not be updated during training
     model.fc = nn.Linear(512, num_classes) # Replaces last FC layer
-
+    nn.init.normal_(model.fc.weight, 0, 0.01)
+    nn.init.zeros_(model.fc.bias)
     #######################
     # END OF YOUR CODE    #
     #######################
