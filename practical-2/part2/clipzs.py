@@ -162,9 +162,16 @@ class ZeroshotCLIP(nn.Module):
 
         # Steps:
         # - Tokenize each text prompt using CLIP's tokenizer.
+        text_inputs = torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(device)
         # - Compute the text features (encodings) for each prompt.
+        with torch.no_grad():
+            text_features = clip_model.encode_text(text_inputs)
         # - Normalize the text features.
+        text_features /= text_features.norm(dim=-1, keepdim=True)
         # - Return a tensor of shape (num_prompts, 512).
+        self.text_features = text_features
+        self.clip_model = clip_model
+        return text_features
 
         # Hint:
         # - Read the CLIP API documentation for more details:
@@ -200,11 +207,16 @@ class ZeroshotCLIP(nn.Module):
 
         # Steps:
         # - Compute the image features (encodings) using the CLIP model.
+        with torch.no_grad():
+            image_features = self.clip_model.encode_image(image)
         # - Normalize the image features.
+        image_features /= image_features.norm(dim=-1, keepdim=True)
         # - Compute similarity logits between the image features and the text features.
+        similarity = (100.0 * image_features @ self.text_features.T).softmax(dim=-1)
         #   You need to multiply the similarity logits with the logit scale (clip_model.logit_scale).
+        logits = similarity @ self.clip_model.logit_scale
         # - Return logits of shape (batch size, number of classes).
-
+        return logits
         # Hint:
         # - Read the CLIP API documentation for more details:
         #   https://github.com/openai/CLIP#api
@@ -365,7 +377,9 @@ def main():
     # - Iterate over the dataloader
     # - For each image in the batch, get the predicted class
     # - Update the accuracy meter
-
+    with torch.no_grad():
+        for images, labels in tqdm(loader):
+            features = self.clip_model.encode_image(images.to(device))
     # Hints:
     # - Before filling this part, you should first complete the ZeroShotCLIP class
     # - Updating the accuracy meter is as simple as calling top1.update(accuracy, batch_size)

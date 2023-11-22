@@ -235,14 +235,19 @@ def main(lr, batch_size, epochs, data_dir, seed, augmentation_name, test_noise):
     model = get_model()
 
     # Get the augmentation to use
-    pass
+    if augmentation_name is not None:
+        model_name = f'ResNet18 with augmentation method {augmentation_name}'
+        checkpoint_name = f'../part2/models/best_model_validation_resnet18_{augmentation_name}.pt'
+    else:
+        model_name = f'ResNet18 without augmentation methods'
+        checkpoint_name = f'../part2/models/best_model_validation_resnet18_default.pt'
 
     # Train the model
-    checkpoint_name = 'best_model_validation'
     model = train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device, augmentation_name)
 
     # Evaluate the model on the test set
-    evaluate_model(model, get_test_set(data_dir, test_noise), device)
+    test_accuracy = evaluate_model(model, get_test_set(data_dir, test_noise), device)
+    print(f'The accuracy of the {model_name} on test set is {test_accuracy: .2f}')
 
     #######################
     # END OF YOUR CODE    #
