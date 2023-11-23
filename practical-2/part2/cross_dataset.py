@@ -195,7 +195,7 @@ def main():
         template = args.text_prompt_template
         prompts = [template.format(c.replace("_", " ")) for c in classnames]
         print("List of prompts:")
-        pprint(prompts)
+        print(prompts)
 
         # 7. Compute the text features
         #######################
