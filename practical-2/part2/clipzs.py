@@ -178,7 +178,7 @@ class ZeroshotCLIP(nn.Module):
         #   https://github.com/openai/CLIP#api
 
         # remove this line once you implement the function
-        raise NotImplementedError("Implement the precompute_text_features function.")
+        #raise NotImplementedError("Implement the precompute_text_features function.")
 
         #######################
         # END OF YOUR CODE    #
@@ -199,7 +199,7 @@ class ZeroshotCLIP(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
 
-        # TODO: Implement the model_inference function.
+        # Implement the model_inference function.
 
         # Instructions:
         # - Given an image, perform the forward pass of the CLIP model,
@@ -214,15 +214,15 @@ class ZeroshotCLIP(nn.Module):
         # - Compute similarity logits between the image features and the text features.
         similarity = (100.0 * image_features @ self.text_features.T).softmax(dim=-1)
         #   You need to multiply the similarity logits with the logit scale (clip_model.logit_scale).
-        logits = similarity @ self.clip_model.logit_scale
+        similarity_x_logits = similarity * self.logit_scale
         # - Return logits of shape (batch size, number of classes).
-        return logits
+        return similarity_x_logits
         # Hint:
         # - Read the CLIP API documentation for more details:
         #   https://github.com/openai/CLIP#api
 
         # remove this line once you implement the function
-        raise NotImplementedError("Implement the model_inference function.")
+        #raise NotImplementedError("Implement the model_inference function.")
 
         #######################
         # END OF YOUR CODE    #
@@ -377,16 +377,24 @@ def main():
     # - Iterate over the dataloader
     # - For each image in the batch, get the predicted class
     # - Update the accuracy meter
-    with torch.no_grad():
-        for images, labels in tqdm(loader):
-            features = self.clip_model.encode_image(images.to(device))
+
     # Hints:
     # - Before filling this part, you should first complete the ZeroShotCLIP class
     # - Updating the accuracy meter is as simple as calling top1.update(accuracy, batch_size)
     # - You can use the model_inference method of the ZeroshotCLIP class to get the logits
 
-    # you can remove the following line once you have implemented the inference loop
-    raise NotImplementedError("Implement the inference loop")
+    hits = 0; total = 0
+    for images, labels in tqdm(loader):
+        images = images.to(device)
+        labels = labels.to(device)
+        #features = self.clip_model.encode_image(images.to(device))
+
+        similarity_x_logis = clipzs.model_inference(images)
+        outputs = similarity_x_logis.softmax(dim=-1)
+        hits += (outputs.argmax(-1) == labels).sum().item()
+        total += labels.shape[0]
+
+        top1.update(hits/total, total)
 
     #######################
     # END OF YOUR CODE    #
