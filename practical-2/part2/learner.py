@@ -84,7 +84,7 @@ class Learner:
             if param.requires_grad:
                 enabled.add(name)
         print(f"Parameters to be updated:")
-        pprint(f"Parameters to be updated: {enabled}")
+        print(f"Parameters to be updated: {enabled}")
 
         # Print number of parameters
         num_params = sum(p.numel() for p in self.clip.parameters() if p.requires_grad)
