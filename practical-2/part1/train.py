@@ -95,6 +95,7 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
 
     # Adjust the batch size of the train_dataset
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size)
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size)
 
     # Initialize the optimizer (Adam) to train the last layer of the model.
     optimizer = torch.optim.Adam(params=model.parameters(),lr=lr)
@@ -137,9 +138,10 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
         val_loss = 0.0
         val_acc = 0
         count = 0
-        for (inputs, labels) in val_dataset:
+        for (inputs, labels) in val_dataloader:
             inputs = inputs.to(device)
             labels = labels.to(device)
+            print('labels ok')
             with torch.no_grad():
                 outputs = model(inputs)
 
