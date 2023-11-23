@@ -81,11 +81,9 @@ class VisualPromptCLIP(nn.Module):
         # Instructions:
         # - Given a list of prompts, compute the text features for each prompt.
         # - Return a tensor of shape (num_prompts, 512).
+        text_features = self.precompute_text_features(clip_model, prompts, args.device)
 
-        # remove this line once you implement the function
-        raise NotImplementedError("Write the code to compute text features.")
-
-        #######################
+            #######################
         # END OF YOUR CODE    #
         #######################
 
