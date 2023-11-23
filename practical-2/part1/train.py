@@ -141,7 +141,6 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
         for (inputs, labels) in val_dataloader:
             inputs = inputs.to(device)
             labels = labels.to(device)
-            print('labels ok')
             with torch.no_grad():
                 outputs = model(inputs)
 
