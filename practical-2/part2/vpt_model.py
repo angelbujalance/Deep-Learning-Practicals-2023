@@ -83,7 +83,7 @@ class VisualPromptCLIP(nn.Module):
         # - Return a tensor of shape (num_prompts, 512).
         text_features = self.precompute_text_features(clip_model, prompts, args.device)
 
-            #######################
+        #######################
         # END OF YOUR CODE    #
         #######################
 
