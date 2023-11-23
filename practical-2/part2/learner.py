@@ -72,8 +72,10 @@ class Learner:
         # TODO: Turn off gradients in both the image and the text encoder
         # Note: You need to keep the visual/deep prompt's parameters trainable
         # Hint: Check for "prompt_learner" and "deep_prompt" in the parameters' names
+        for name, param in self.clip.named_parameters():
+            if not name.startswith('prompt_learner.'):
+                param.requires_grad = False
 
-        raise NotImplementedError
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -84,7 +86,7 @@ class Learner:
             if param.requires_grad:
                 enabled.add(name)
         print(f"Parameters to be updated:")
-        print(f"Parameters to be updated: {enabled}")
+        pprint(f"Parameters to be updated: {enabled}")
 
         # Print number of parameters
         num_params = sum(p.numel() for p in self.clip.parameters() if p.requires_grad)
@@ -216,17 +218,28 @@ class Learner:
             # PUT YOUR CODE HERE  #
             #######################
 
-            # TODO: Implement the training step for a single batch
+            # training step for a single batch
 
-            # Steps ( your usual training loop :) ):
             # - Set the gradients to zero
-            # - Move the images/targets to the device
-            # - Perform a forward pass (using self.clip)
-            # - Compute the loss (using self.criterion)
-            # - Perform a backward pass
-            # - Update the parameters
+            self.optimizer.zero_grad()
 
-            raise NotImplementedError
+            # - Move the images/targets to the device
+            images = images.to(self.device)
+            target = target.to(self.device)
+
+            # - Perform a forward pass (using self.clip)
+            output = self.clip.forward(images)
+
+            # - Compute the loss (using self.criterion)
+            loss = self.criterion(output, target)
+            loss.requires_grad = True
+
+            # - Perform a backward pass
+            loss.backward()
+
+            # - Update the parameters
+            self.optimizer.step()
+
             #######################
             # END OF YOUR CODE    #
             #######################
@@ -286,12 +299,16 @@ class Learner:
 
                 # TODO: Implement the evaluation step for a single batch
 
-                # Steps ( your usual evaluation loop :) ):
                 # - Move the images/targets to the device
-                # - Forward pass (using self.clip)
-                # - Compute the loss (using self.criterion)
+                images = images.to(self.device)
+                target = target.to(self.device)
 
-                raise NotImplementedError
+                # - Forward pass (using self.clip)
+                output = self.clip(images)
+
+                # - Compute the loss (using self.criterion)
+                loss = self.criterion(output, target)
+
                 #######################
                 # END OF YOUR CODE    #
                 #######################
