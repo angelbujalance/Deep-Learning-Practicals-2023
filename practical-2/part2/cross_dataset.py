@@ -175,7 +175,7 @@ def main():
         # PUT YOUR CODE HERE  #
         #######################
         # TODO: Define `classnames` as a list of 10 + 100 class labels from CIFAR10 and CIFAR100
-
+        
         raise NotImplementedError
         #######################
         # END OF YOUR CODE    #
