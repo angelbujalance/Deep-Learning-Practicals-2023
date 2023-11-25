@@ -38,6 +38,7 @@ class FixedPatchPrompter(nn.Module):
         # patch (can define as self.patch) of size [prompt_size, prompt_size]
         # that is placed at the top-left corner of the image.
 
+
         # Hints:
         # - The size of patch needs to be [1, 3, prompt_size, prompt_size]
         #     (1 for the batch dimension)
@@ -45,7 +46,7 @@ class FixedPatchPrompter(nn.Module):
         # - You can define variable parameters using torch.nn.Parameter
         # - You can initialize the patch randomly in N(0, 1) using torch.randn
 
-        raise NotImplementedError
+
         #######################
         # END OF YOUR CODE    #
         #######################
