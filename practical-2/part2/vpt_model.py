@@ -108,16 +108,20 @@ class VisualPromptCLIP(nn.Module):
         # the model_inferece function in clipzs.py! Please see the steps below.
 
         # Steps:
-        # - [!] Add the prompt to the image using self.prompt_learner.
+        # - Add the prompt to the image using self.prompt_learner.
+        image = self.prompt_learner(image)
         # - Compute the image features using the CLIP model.
-        # - Normalize the image features.
-        # - Compute similarity logits between the image features and the text features.
-        # - You need to multiply the similarity logits with the logit scale (clip_model.logit_scale).
+        with torch.no_grad():
+            image_features = self.clip_model.encode_image(image)
+
+            # - Normalize the image features.
+            image_features /= image_features.norm(dim=-1, keepdim=True)
+
+            # - Compute similarity logits between the image features and the text features.
+            logits = (100.0 * image_features @ self.text_features.T) * self.logit_scale
+
         # - Return logits of shape (batch size, number of classes).
-
-        # remove this line once you implement the function
-        raise NotImplementedError("Implement the model_inference function.")
-
+        return logits
         #######################
         # END OF YOUR CODE    #
         #######################
