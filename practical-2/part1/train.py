@@ -60,9 +60,9 @@ def get_model(num_classes=100):
     # Randomly initialize and modify the model's last layer for CIFAR100.
     for param in model.parameters():
         param.requires_grad = False # Parameters will not be updated during training
-    model.fc = nn.Linear(512, num_classes) # Replaces last FC layer
-    nn.init.normal_(model.fc.weight, 0, 0.01)
-    nn.init.zeros_(model.fc.bias)
+    model.fc = nn.Linear(model.fc.in_features, num_classes) # Replaces last FC layer
+    nn.init.normal_(model.fc.weight.data, 0, 0.01)
+    nn.init.zeros_(model.fc.bias.data)
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -182,10 +182,9 @@ def evaluate_model(model, data_loader, device):
 
     # Set model to evaluation mode (Remember to set it back to training mode in the training loop)
     model.eval()
-    loss_module = nn.CrossEntropyLoss() # Loss module or criterion
+    #loss_module = nn.CrossEntropyLoss() # Loss module or criterion
 
     # Metrics for validation
-    val_loss = 0.0
     accuracy = 0
     count = 0
 
@@ -197,8 +196,6 @@ def evaluate_model(model, data_loader, device):
         with torch.no_grad():
             outputs = model(inputs)
 
-            loss = loss_module(outputs, labels)
-            val_loss += loss.item()
             accuracy += (outputs.argmax(1) == labels).sum().item()
             count += labels.shape[0]
     accuracy /= count
@@ -234,6 +231,7 @@ def main(lr, batch_size, epochs, data_dir, seed, augmentation_name, test_noise):
 
     # Load the model
     model = get_model()
+    model.to(device)
 
     # Get the augmentation to use
     if augmentation_name is not None:
