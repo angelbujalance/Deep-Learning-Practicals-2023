@@ -72,10 +72,8 @@ class Learner:
         # TODO: Turn off gradients in both the image and the text encoder
         # Note: You need to keep the visual/deep prompt's parameters trainable
         # Hint: Check for "prompt_learner" and "deep_prompt" in the parameters' names
-        for name, param in self.clip.named_parameters():
-            if not name.startswith('prompt_learner.'):
-                param.requires_grad = False
 
+        raise NotImplementedError
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -128,7 +126,10 @@ class Learner:
             if self.args.gpu is not None:
                 # best_acc1 may be from a checkpoint from a different GPU
                 best_acc1 = best_acc1.to(self.args.gpu)
-            self.clip.prompt_learner.load_state_dict(checkpoint["state_dict"])
+            if self.args.prompt_type == 'visual_prompt':
+                self.clip.prompt_learner.load_state_dict(checkpoint["state_dict"])
+            else:
+                self.clip.load_state_dict(checkpoint["state_dict"])
             print(
                 "=> loaded checkpoint '{}' (epoch {})".format(
                     self.args.resume, checkpoint["epoch"]
@@ -218,36 +219,20 @@ class Learner:
             # PUT YOUR CODE HERE  #
             #######################
 
-            # training step for a single batch
+            # TODO: Implement the training step for a single batch
 
+            # Steps ( your usual training loop :) ):
             # - Set the gradients to zero
-            self.optimizer.zero_grad()
-
             # - Move the images/targets to the device
-            images = images.to(self.device)
-            target = target.to(self.device)
-
             # - Perform a forward pass (using self.clip)
-            output = self.clip.forward(images)
-
             # - Compute the loss (using self.criterion)
-            loss = self.criterion(output, target)
-            loss.requires_grad = True
-
             # - Perform a backward pass
-            loss.backward()
-
             # - Update the parameters
-            self.optimizer.step()
 
+            raise NotImplementedError
             #######################
             # END OF YOUR CODE    #
             #######################
-
-            # Note: we clamp to 4.6052 = ln(100), as in the original paper.
-            self.clip.logit_scale.data = torch.clamp(
-                self.clip.logit_scale.data, 0, 4.6052
-            )
 
             # Measure accuracy
             acc1 = accuracy(output, target, topk=(1,))
@@ -299,16 +284,12 @@ class Learner:
 
                 # TODO: Implement the evaluation step for a single batch
 
+                # Steps ( your usual evaluation loop :) ):
                 # - Move the images/targets to the device
-                images = images.to(self.device)
-                target = target.to(self.device)
-
                 # - Forward pass (using self.clip)
-                output = self.clip(images)
-
                 # - Compute the loss (using self.criterion)
-                loss = self.criterion(output, target)
 
+                raise NotImplementedError
                 #######################
                 # END OF YOUR CODE    #
                 #######################

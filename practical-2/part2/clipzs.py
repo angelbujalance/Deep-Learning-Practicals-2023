@@ -162,23 +162,16 @@ class ZeroshotCLIP(nn.Module):
 
         # Steps:
         # - Tokenize each text prompt using CLIP's tokenizer.
-        text_inputs = torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(device)
         # - Compute the text features (encodings) for each prompt.
-        with torch.no_grad():
-            text_features = clip_model.encode_text(text_inputs)
         # - Normalize the text features.
-        text_features /= text_features.norm(dim=-1, keepdim=True)
         # - Return a tensor of shape (num_prompts, 512).
-        self.text_features = text_features
-        self.clip_model = clip_model
-        return text_features
 
         # Hint:
         # - Read the CLIP API documentation for more details:
         #   https://github.com/openai/CLIP#api
 
         # remove this line once you implement the function
-        #raise NotImplementedError("Implement the precompute_text_features function.")
+        raise NotImplementedError("Implement the precompute_text_features function.")
 
         #######################
         # END OF YOUR CODE    #
@@ -189,17 +182,17 @@ class ZeroshotCLIP(nn.Module):
         Performs inference on a single image.
 
         Args:
-            image (torch.Tensor): image tensor of shape (3, 224, 224)
+            image (torch.Tensor): image tensor of shape (batch_size, 3, 224, 224)
 
         Returns:
-            logits (torch.Tensor): logits of shape (num_classes,)
+            logits (torch.Tensor): logits of shape (batch_size, num_classes)
         """
 
         #######################
         # PUT YOUR CODE HERE  #
         #######################
 
-        # Implement the model_inference function.
+        # TODO: Implement the model_inference function.
 
         # Instructions:
         # - Given an image, perform the forward pass of the CLIP model,
@@ -207,22 +200,17 @@ class ZeroshotCLIP(nn.Module):
 
         # Steps:
         # - Compute the image features (encodings) using the CLIP model.
-        with torch.no_grad():
-            image_features = self.clip_model.encode_image(image)
         # - Normalize the image features.
-        image_features /= image_features.norm(dim=-1, keepdim=True)
         # - Compute similarity logits between the image features and the text features.
-        similarity = (100.0 * image_features @ self.text_features.T).softmax(dim=-1)
-        #   You need to multiply the similarity logits with the logit scale (clip_model.logit_scale).
-        similarity_x_logits = similarity * self.logit_scale
+        #   You need to multiply the similarity logits with the logit scale (self.logit_scale).
         # - Return logits of shape (batch size, number of classes).
-        return similarity_x_logits
+
         # Hint:
         # - Read the CLIP API documentation for more details:
         #   https://github.com/openai/CLIP#api
 
         # remove this line once you implement the function
-        #raise NotImplementedError("Implement the model_inference function.")
+        raise NotImplementedError("Implement the model_inference function.")
 
         #######################
         # END OF YOUR CODE    #
@@ -383,18 +371,8 @@ def main():
     # - Updating the accuracy meter is as simple as calling top1.update(accuracy, batch_size)
     # - You can use the model_inference method of the ZeroshotCLIP class to get the logits
 
-    hits = 0; total = 0
-    for images, labels in tqdm(loader):
-        images = images.to(device)
-        labels = labels.to(device)
-        #features = self.clip_model.encode_image(images.to(device))
-
-        similarity_x_logis = clipzs.model_inference(images)
-        outputs = similarity_x_logis.softmax(dim=-1)
-        hits += (outputs.argmax(-1) == labels).sum().item()
-        total += labels.shape[0]
-
-        top1.update(hits/total, total)
+    # you can remove the following line once you have implemented the inference loop
+    raise NotImplementedError("Implement the inference loop")
 
     #######################
     # END OF YOUR CODE    #
