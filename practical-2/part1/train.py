@@ -94,11 +94,11 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     train_dataset, val_dataset = get_train_validation_set(data_dir=data_dir, augmentation_name=augmentation_name)
 
     # Adjust the batch size of the train_dataset
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size)
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size)
 
     # Initialize the optimizer (Adam) to train the last layer of the model.
-    optimizer = torch.optim.Adam(params=model.parameters(),lr=lr)
+    optimizer = torch.optim.Adam(params=model.fc.parameters(),lr=lr)
     loss_module = nn.CrossEntropyLoss() # Loss module or criterion
 
     # Lists to store relevant statistics for training and validation
@@ -108,8 +108,9 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     # Accuracy of the best model during accuracy. Set to 0 before training
     best_val_acc = 0.0
 
+    print("The training loop starts")
     # Training loop with validation after each epoch. Save the best model.
-    for epoch in tqdm(range(epochs)):
+    for epoch in range(epochs):
 
         # Training loop
         model.train()
@@ -157,6 +158,7 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
             torch.save(model.state_dict(), checkpoint_name)
 
     model.load_state_dict(torch.load(checkpoint_name))
+    print("Validation accuracies for epoch:", val_accuracies)
     #######################
     # END OF YOUR CODE    #
     #######################
