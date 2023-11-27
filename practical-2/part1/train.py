@@ -245,7 +245,10 @@ def main(lr, batch_size, epochs, data_dir, seed, augmentation_name, test_noise):
     model = train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device, augmentation_name)
 
     # Evaluate the model on the test set
-    test_accuracy = evaluate_model(model, get_test_set(data_dir, test_noise), device)
+    cifar100_test = get_test_set(data_dir, test_noise)
+    test_loader = data.DataLoader(dataset=cifar100_test, batch_size=batch_size, shuffle=False,
+                                  drop_last=False)
+    test_accuracy = evaluate_model(model, test_loader, device)
     print(f'The accuracy of the {model_name} on test set is {test_accuracy: .2f}')
 
     #######################
