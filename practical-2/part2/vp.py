@@ -38,7 +38,6 @@ class FixedPatchPrompter(nn.Module):
         # patch (can define as self.patch) of size [prompt_size, prompt_size]
         # that is placed at the top-left corner of the image.
 
-
         # Hints:
         # - The size of patch needs to be [1, 3, prompt_size, prompt_size]
         #     (1 for the batch dimension)
@@ -47,7 +46,6 @@ class FixedPatchPrompter(nn.Module):
         # - You can initialize the patch randomly in N(0, 1) using torch.randn
         self.image_size = args.image_size
         self.patch = nn.Parameter(torch.randn(1, 3, args.prompt_size, args.prompt_size))
-
 
         #######################
         # END OF YOUR CODE    #
@@ -64,8 +62,7 @@ class FixedPatchPrompter(nn.Module):
         # - It is always advisable to implement and then visualize if
         #   your prompter does what you expect it to do.
 
-        #raise NotImplementedError
-        x[:,:,0,0] += self.patch
+        x += self.patch
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -98,7 +95,6 @@ class PadPrompter(nn.Module):
         # - Shape of self.pad_up and self.pad_down should be (1, 3, pad_size, image_size)
         # - See Fig 2.(g)/(h) and think about the shape of self.pad_left and self.pad_right
 
-        #raise NotImplementedError
         self.patch = nn.Parameter(torch.randn(1, 3, args.prompt_size, args.prompt_size))
 
         #######################
@@ -116,10 +112,10 @@ class PadPrompter(nn.Module):
         # - It is always advisable to implement and then visualize if
         #   your prompter does what you expect it to do.
 
-        x[:,:,:self.pad_size,:] += self.pad_up
-        x[:,:,-self.pad_size:,:] += self.pad_down
-        x[:,:,self.pad_size:-self.pad_size,:self.pad_size] += self.pad_left
-        x[:,:,self.pad_size:-self.pad_size,-self.pad_size:] += self.pad_right
+        x[:, :, :self.pad_size, :] += self.pad_up
+        x[:, :, -self.pad_size:, :] += self.pad_down
+        x[:, :, self.pad_size:-self.pad_size, :self.pad_size] += self.pad_left
+        x[:, :, self.pad_size:-self.pad_size, -self.pad_size:] += self.pad_right
 
 
         #######################
