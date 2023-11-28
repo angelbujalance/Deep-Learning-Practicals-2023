@@ -66,12 +66,10 @@ class DeepPromptCLIP(nn.Module):
         text_features = []
 
         with torch.no_grad():
-            for i_promp in prompts:
-            text_features.appendclip_model.encode_text(clip_model.tokenize([i_promp]).to(args.device))
+            for i_prompt in prompts:
+                text_features.append(clip_model.encode_text(clip_model.tokenize([i_prompt]).to(args.device)))
 
-        # remove this line once you implement the function
-        raise NotImplementedError("Write the code to compute text features.")
-
+        text_features = torch.stack(text_features)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -86,15 +84,12 @@ class DeepPromptCLIP(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
 
-        # TODO: Initialize the learnable deep prompt.
+        # Initialize the learnable deep prompt.
         # Hint: consider the shape required for the deep prompt to be compatible with the CLIP model 
         # Hint: CLIP uses different datatypes for CPU (float32) and GPU (float16)
         # Hint: use args.prompt_num to specify the number of deep prompts to use
 
-        self.deep_prompt = 
-
-        # remove this line once you implement the function
-        raise NotImplementedError("Write the code to compute text features.")
+        self.deep_prompt = nn.Parameter(torch.randn(512))
 
         #######################
         # END OF YOUR CODE    #
@@ -107,18 +102,24 @@ class DeepPromptCLIP(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
 
-        # TODO: Implement the forward function. This is not exactly the same as
+        # Implement the forward function. This is not exactly the same as
         # the model_inferece function in clipzs.py! Please see the steps below.
 
         # Steps:
         # - Compute the image features using the CLIP model (be sure use the custom_encode_image function).
-        # - Normalize the image features.
-        # - Compute similarity logits between the image features and the text features.
-        # - You need to multiply the similarity logits with the logit scale (clip_model.logit_scale).
-        # - Return logits of shape (batch size, number of classes).
+        image_features = self.custom_encode_image(image)
 
-        # remove this line once you implement the function
-        raise NotImplementedError("Implement the model_inference function.")
+        # - Normalize the image features.
+        image_features /= image_features.norm(dim=-1, keepdim=True)
+
+        # - Compute similarity logits between the image features and the text features.
+        similarity_logits = torch.matmul(image_features, self.text_features.t())
+
+        # - You need to multiply the similarity logits with the logit scale (clip_model.logit_scale).
+        similarity_logits *= self.logit_scale
+
+        # - Return logits of shape (batch size, number of classes).
+        return similarity_logits.sum(dim=-1)
 
         #######################
         # END OF YOUR CODE    #
@@ -154,8 +155,11 @@ class DeepPromptCLIP(nn.Module):
 
         # Hint: Beware of the batch size (the deep prompt is the same for all images in the batch).
 
-        # remove this line once you implement the function
-        raise NotImplementedError("Implement the model_inference function.")
+        for i, resblock in enumerate(image_encoder.transformer.resblocks):
+            x = resblock(x)
+
+            if i == self.injection_layer:
+                x += self.deep_prompt.unsqueeze(0).unsqueeze(0)
 
         #######################
         # END OF YOUR CODE    #
