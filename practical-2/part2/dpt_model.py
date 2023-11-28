@@ -63,6 +63,11 @@ class DeepPromptCLIP(nn.Module):
         # Instructions:
         # - Given a list of prompts, compute the text features for each prompt.
         # - Return a tensor of shape (num_prompts, 512).
+        text_features = []
+
+        with torch.no_grad():
+            for i_promp in prompts:
+            text_features.appendclip_model.encode_text(clip_model.tokenize([i_promp]).to(args.device))
 
         # remove this line once you implement the function
         raise NotImplementedError("Write the code to compute text features.")
