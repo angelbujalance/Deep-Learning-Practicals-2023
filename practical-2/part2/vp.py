@@ -34,7 +34,7 @@ class FixedPatchPrompter(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        # TODO: Define the prompt parameters here. The prompt is basically a
+        # Define the prompt parameters here. The prompt is basically a
         # patch (can define as self.patch) of size [prompt_size, prompt_size]
         # that is placed at the top-left corner of the image.
 
@@ -45,6 +45,7 @@ class FixedPatchPrompter(nn.Module):
         #     (3 for the RGB channels)
         # - You can define variable parameters using torch.nn.Parameter
         # - You can initialize the patch randomly in N(0, 1) using torch.randn
+        self.patch = nn.Parameter(torch.randn(1, 3, args.prompt_size, args.prompt_size))
 
 
         #######################
