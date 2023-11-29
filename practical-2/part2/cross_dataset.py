@@ -207,7 +207,7 @@ def main():
         # Compute the text features (for each of the prompts defined above) using CLIP
         # Note: This is similar to the code you wrote in `clipzs.py`
 
-        text_inputs = torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(args.device)
+        text_inputs = clip.tokenize(prompts).to(args.device) #torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(args.device)
 
         # - Compute the text features (encodings) for each prompt.
         with torch.no_grad():
