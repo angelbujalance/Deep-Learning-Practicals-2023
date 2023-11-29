@@ -122,7 +122,7 @@ class VisualPromptCLIP(nn.Module):
 
         # Steps:
         # - Add the prompt to the image using self.prompt_learner.
-        image_plus_prompt = self.prompt_learner(image, self.text_features)
+        image_plus_prompt = self.prompt_learner(image)
         # - Compute the image features using the CLIP model.
         with torch.no_grad():
             image_features = self.clip_model.encode_image(image_plus_prompt)
