@@ -57,16 +57,8 @@ class FixedPatchPrompter(nn.Module):
         #######################
         # For a given batch of images, place the patch at the top-left
 
-        # Hints:
-        # - First define the prompt. Then add it to the batch of images.
-        batch_size, _, height, width = x.size()
-        # - It is always advisable to implement and then visualize if
-        #   your prompter does what you expect it to do.
-
-        #x += self.patch
-        patch = self.patch.repeat(batch_size, 1, 1, 1)
-
-        x[:, :, :patch.size(2), :patch.size(3)] = patch
+        x = x.to(self.device)
+        x[:, :, :self.prompt_size, :self.prompt_size] += self.patch.to(self.device).data
 
         return x
         #######################
