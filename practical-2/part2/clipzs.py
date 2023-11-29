@@ -162,7 +162,7 @@ class ZeroshotCLIP(nn.Module):
 
         # Steps:
         # - Tokenize each text prompt using CLIP's tokenizer.
-        text_inputs = torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(device)
+        text_inputs = clip.tokenize(prompts).to(device) #torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(device)
         # - Compute the text features (encodings) for each prompt.
         with torch.no_grad():
             text_features = clip_model.encode_text(text_inputs)
@@ -205,7 +205,7 @@ class ZeroshotCLIP(nn.Module):
         # - Normalize the image features.
         image_features /= image_features.norm(dim=-1, keepdim=True)
         # - Compute similarity logits between the image features and the text features.
-        similarity = (100.0 * image_features @ self.text_features.T).softmax(dim=-1)
+        similarity = (100.0 * image_features @ self.text_features.T)
         #   You need to multiply the similarity logits with the logit scale (clip_model.logit_scale).
         similarity_x_logits = similarity * self.logit_scale
         # - Return logits of shape (batch size, number of classes).
