@@ -309,6 +309,7 @@ class Learner:
 
                 # - Compute the loss (using self.criterion)
                 loss = self.criterion(output, target)
+
                 #######################
                 # END OF YOUR CODE    #
                 #######################

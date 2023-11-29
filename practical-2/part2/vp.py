@@ -59,10 +59,14 @@ class FixedPatchPrompter(nn.Module):
 
         # Hints:
         # - First define the prompt. Then add it to the batch of images.
+        batch_size, _, height, width = x.size()
         # - It is always advisable to implement and then visualize if
         #   your prompter does what you expect it to do.
 
-        x += self.patch
+        #x += self.patch
+        patch = self.patch.repeat(batch_size, 1, 1, 1)
+
+        x[:, :, :patch.size(2), :patch.size(3)] = patch
 
         return x
         #######################
