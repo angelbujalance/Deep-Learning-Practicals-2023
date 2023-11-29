@@ -45,6 +45,7 @@ class FixedPatchPrompter(nn.Module):
         # - You can define variable parameters using torch.nn.Parameter
         # - You can initialize the patch randomly in N(0, 1) using torch.randn
         self.image_size = args.image_size
+        self.prompt_size = args.prompt_size
         self.patch = nn.Parameter(torch.randn(1, 3, args.prompt_size, args.prompt_size))
 
         #######################
@@ -57,7 +58,7 @@ class FixedPatchPrompter(nn.Module):
         #######################
         # For a given batch of images, place the patch at the top-left
 
-        x[:, :, :self.prompt_size, :self.prompt_size] += self.patch.to(self.device).data
+        x[:, :, :self.prompt_size, :self.prompt_size] += self.patch
 
         return x
         #######################
