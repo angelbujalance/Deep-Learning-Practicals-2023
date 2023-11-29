@@ -82,13 +82,11 @@ class PadPrompter(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
         # Define the padding as variables self.pad_left, self.pad_right, self.pad_up, self.pad_down
         self.pad_left = nn.Parameter(torch.randn(1, 3, image_size - 2 * pad_size, pad_size))
         self.pad_right = nn.Parameter(torch.randn(1, 3, image_size - 2 * pad_size, pad_size))
         self.pad_up = nn.Parameter(torch.randn(1, 3, pad_size, image_size))
         self.pad_down = nn.Parameter(torch.randn(1, 3, pad_size, image_size))
-
 
         # Hints:
         # - Each of these are parameters that we need to learn. So how would you define them in torch?
@@ -97,7 +95,6 @@ class PadPrompter(nn.Module):
         # - See Fig 2.(g)/(h) and think about the shape of self.pad_left and self.pad_right
 
         self.patch = nn.Parameter(torch.randn(1, 3, args.prompt_size, args.prompt_size))
-
         #######################
         # END OF YOUR CODE    #
         #######################
