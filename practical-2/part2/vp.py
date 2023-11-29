@@ -57,7 +57,6 @@ class FixedPatchPrompter(nn.Module):
         #######################
         # For a given batch of images, place the patch at the top-left
 
-        x = x.to(self.device)
         x[:, :, :self.prompt_size, :self.prompt_size] += self.patch.to(self.device).data
 
         return x
