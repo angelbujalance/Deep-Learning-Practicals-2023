@@ -81,21 +81,21 @@ class VisualPromptCLIP(nn.Module):
         # Instructions:
         # - Given a list of prompts, compute the text features for each prompt.
         # - Return a tensor of shape (num_prompts, 512).
-        #text_inputs = clip.tokenize(prompts).to(args.device)
-        #with torch.no_grad():
+        text_inputs = clip.tokenize(prompts).to(args.device)
+        with torch.no_grad():
             # Compute the text features (encodings) for each prompt.
-        #    text_features = clip_model.encode_text(text_inputs)
+            text_features = clip_model.encode_text(text_inputs)
 
-        #text_features /= text_features.norm(dim=-1, keepdim=True)
+        text_features /= text_features.norm(dim=-1, keepdim=True)
 
-        text_features = []
+        #text_features = []
 
-        for prompt in prompts:
-            text = clip.tokenize([prompt]).to(args.device)
-            text_feature = clip_model.encode_text(text)
-            text_features.append(text_feature)
+        #for prompt in prompts:
+        #    text = clip.tokenize([prompt]).to(args.device)
+        #    text_feature = clip_model.encode_text(text)
+        #    text_features.append(text_feature)
 
-        text_features = torch.stack(text_features)
+        #text_features = torch.stack(text_features)
         #######################
         # END OF YOUR CODE    #
         #######################
