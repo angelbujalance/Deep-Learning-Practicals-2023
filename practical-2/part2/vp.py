@@ -63,6 +63,8 @@ class FixedPatchPrompter(nn.Module):
         #   your prompter does what you expect it to do.
 
         x += self.patch
+
+        return x
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -114,6 +116,8 @@ class PadPrompter(nn.Module):
         x[:, :, -self.pad_down.size(2):, :] += self.pad_down
         x[:, :, self.pad_size:-self.pad_size, :self.pad_size] += self.pad_left
         x[:, :, self.pad_size:-self.pad_size, -self.pad_size:] += self.pad_right
+
+        return x
         #######################
         # END OF YOUR CODE    #
         #######################
