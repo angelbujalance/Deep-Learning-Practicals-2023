@@ -77,16 +77,17 @@ class PadPrompter(nn.Module):
         pad_size = args.prompt_size
         image_size = args.image_size
         self.pad_size = pad_size
+        self.image_size = image_size
 
         #######################
         # PUT YOUR CODE HERE  #
         #######################
 
         # Define the padding as variables self.pad_left, self.pad_right, self.pad_up, self.pad_down
-        self.pad_left = nn.Parameter(torch.randn(1, 3, image_size-2*pad_size, pad_size))
-        self.pad_right = nn.Parameter(torch.randn(1, 3, image_size-2*pad_size, pad_size))
-        self.pad_up = nn.Parameter(torch.randn(1, 3, image_size*pad_size, pad_size))
-        self.pad_down = nn.Parameter(torch.randn(1, 3, image_size*pad_size, pad_size))
+        self.pad_left = nn.Parameter(torch.randn(1, 3, image_size - 2 * pad_size, pad_size))
+        self.pad_right = nn.Parameter(torch.randn(1, 3, image_size - 2 * pad_size, pad_size))
+        self.pad_up = nn.Parameter(torch.randn(1, 3, pad_size, image_size))
+        self.pad_down = nn.Parameter(torch.randn(1, 3, pad_size, image_size))
 
 
         # Hints:
@@ -112,12 +113,10 @@ class PadPrompter(nn.Module):
         # - It is always advisable to implement and then visualize if
         #   your prompter does what you expect it to do.
 
-        x[:, :, :self.pad_size, :] += self.pad_up
-        x[:, :, -self.pad_size:, :] += self.pad_down
+        x[:, :, :self.pad_up.size(2), :] += self.pad_up
+        x[:, :, -self.pad_down.size(2):, :] += self.pad_down
         x[:, :, self.pad_size:-self.pad_size, :self.pad_size] += self.pad_left
         x[:, :, self.pad_size:-self.pad_size, -self.pad_size:] += self.pad_right
-
-
         #######################
         # END OF YOUR CODE    #
         #######################
