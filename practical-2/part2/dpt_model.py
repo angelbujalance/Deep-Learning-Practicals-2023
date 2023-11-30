@@ -57,7 +57,7 @@ class DeepPromptCLIP(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
 
-        # TODO: Write code to compute text features.
+        # Write code to compute text features.
         # Hint: You can use the code from clipzs.py here!
 
         # Instructions:
