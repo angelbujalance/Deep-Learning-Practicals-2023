@@ -94,8 +94,8 @@ class DeepPromptCLIP(nn.Module):
         # Hint: consider the shape required for the deep prompt to be compatible with the CLIP model 
         # Hint: CLIP uses different datatypes for CPU (float32) and GPU (float16)
         # Hint: use args.prompt_num to specify the number of deep prompts to use
-
-        self.deep_prompt = nn.Parameter(torch.randn(512))
+        prompt_length = 768
+        self.deep_prompt = nn.Parameter(torch.randn((args.prompt_num, prompt_length)))  # As text features in CLIP have dimension 512
 
         #######################
         # END OF YOUR CODE    #
@@ -162,10 +162,13 @@ class DeepPromptCLIP(nn.Module):
         # Hint: Beware of the batch size (the deep prompt is the same for all images in the batch).
 
         for i, resblock in enumerate(image_encoder.transformer.resblocks):
+            if i == self.injection_layer:
+                deep_prompt_ = self.deep_prompt.expand(x.shape[1], -1, -1).permute(1, 0, 2)
+                x = torch.cat([deep_prompt_, x], dim=0)
+
             x = resblock(x)
 
-            if i == self.injection_layer:
-                x += self.deep_prompt.unsqueeze(0).unsqueeze(0)
+
 
         #######################
         # END OF YOUR CODE    #
