@@ -70,10 +70,10 @@ class DeepPromptCLIP(nn.Module):
         #        text_features.append(clip_model.encode_text(clip_model.tokenize([i_prompt]).to(args.device)))
 
         #text_features = torch.stack(text_features)
-        text_inputs = clip.tokenize(prompts).to(args.device)  # torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(device)
+        #text_inputs = clip.tokenize(prompts).to(args.device)  # torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(device)
         # - Compute the text features (encodings) for each prompt.
         with torch.no_grad():
-            text_features = clip_model.encode_text(text_inputs)
+            text_features = clip_model.encode_text(prompts)
         # - Normalize the text features.
         text_features /= text_features.norm(dim=-1, keepdim=True)
         #######################
