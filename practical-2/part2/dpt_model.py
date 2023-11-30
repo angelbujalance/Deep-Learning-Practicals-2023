@@ -63,19 +63,13 @@ class DeepPromptCLIP(nn.Module):
         # Instructions:
         # - Given a list of prompts, compute the text features for each prompt.
         # - Return a tensor of shape (num_prompts, 512).
-        #text_features = []
-
-        #with torch.no_grad():
-        #    for i_prompt in prompts:
-        #        text_features.append(clip_model.encode_text(clip_model.tokenize([i_prompt]).to(args.device)))
-
-        #text_features = torch.stack(text_features)
-        #text_inputs = clip.tokenize(prompts).to(args.device)  # torch.cat([clip.tokenize(f'a photo of a {c}') for c in prompts]).to(device)
-        # - Compute the text features (encodings) for each prompt.
+   
+                
         with torch.no_grad():
             text_features = clip_model.encode_text(prompts)
-        # - Normalize the text features.
-        text_features /= text_features.norm(dim=-1, keepdim=True)
+
+        text_features  /= text_features.norm(dim=-1, keepdim=True)
+        
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -92,11 +86,13 @@ class DeepPromptCLIP(nn.Module):
 
         # Initialize the learnable deep prompt.
         # Hint: consider the shape required for the deep prompt to be compatible with the CLIP model 
-        # Hint: CLIP uses different datatypes for CPU (float32) and GPU (float16)
-        # Hint: use args.prompt_num to specify the number of deep prompts to use
         prompt_length = 768
-        self.deep_prompt = nn.Parameter(torch.randn((args.prompt_num, prompt_length)))  # As text features in CLIP have dimension 512
+        self.deep_prompt = nn.Parameter(torch.randn((args.prompt_num, prompt_length))) #As text features in CLIP have dimension 512
 
+        if args.device == "cpu":
+            self.deep_prompt = nn.Parameter(self.deep_prompt.float())
+        else:
+            self.deep_prompt = nn.Parameter(self.deep_prompt.half())
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -116,17 +112,18 @@ class DeepPromptCLIP(nn.Module):
         image_features = self.custom_encode_image(image)
 
         # - Normalize the image features.
-        image_features /= image_features.norm(dim=-1, keepdim=True)
+        image_features_normalized = image_features / image_features.norm(dim=-1, keepdim=True)
 
         # - Compute similarity logits between the image features and the text features.
-        similarity_logits = torch.matmul(image_features, self.text_features.t())
+        similarity_logits = image_features_normalized @ self.text_features.T
+
 
         # - You need to multiply the similarity logits with the logit scale (clip_model.logit_scale).
-        similarity_logits *= self.logit_scale
-
+        logits = similarity_logits * self.logit_scale
+ 
         # - Return logits of shape (batch size, number of classes).
-        return similarity_logits.sum(dim=-1)
-
+        return logits
+        
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -151,7 +148,7 @@ class DeepPromptCLIP(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
 
-        # TODO: Implement the part of the code where the deep prompt is injected into the CLIP model.
+        # Implement the part of the code where the deep prompt is injected into the CLIP model.
         # The custom_encode_image function largely follows the code from the CLIP repository.
         # You only need to modify the code responsible for running the transformer blocks.
 
@@ -160,18 +157,17 @@ class DeepPromptCLIP(nn.Module):
         # - Inject the deep prompt at the specified layer (self.injection_layer).
 
         # Hint: Beware of the batch size (the deep prompt is the same for all images in the batch).
-        deep_prompt_dtype = x.dtype
-        self.deep_prompt = nn.Parameter(self.deep_prompt.data.to(deep_prompt_dtype))
+        #Chapuza
+        deep_prompt_dtype = x.dtype 
+        self.deep_prompt.to(deep_prompt_dtype)
 
         for i, resblock in enumerate(image_encoder.transformer.resblocks):
+            # Inject deep prompt at the specified layer
             if i == self.injection_layer:
-                deep_prompt_ = self.deep_prompt.expand(x.shape[1], -1, -1).permute(1, 0, 2)
-                x = torch.cat([deep_prompt_, x], dim=0)
-
+                dp_expanded = self.deep_prompt.expand(x.shape[1], -1, -1) 
+                dp_expanded = dp_expanded.permute(1, 0, 2) 
+                x = torch.cat([dp_expanded, x], dim=0) 
             x = resblock(x)
-
-
-
         #######################
         # END OF YOUR CODE    #
         #######################

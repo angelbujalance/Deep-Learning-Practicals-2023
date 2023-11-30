@@ -175,7 +175,7 @@ class ZeroshotCLIP(nn.Module):
         self.text_features = text_features
         self.clip_model = clip_model
 
-        return text_features
+        return text_features.view(len(prompts), 512)
 
         #######################
         # END OF YOUR CODE    #
@@ -380,19 +380,24 @@ def main():
     # - Updating the accuracy meter is as simple as calling top1.update(accuracy, batch_size)
     # - You can use the model_inference method of the ZeroshotCLIP class to get the logits
 
-    hits = 0
-    total = 0
+    #hits = 0
+    #total = 0
     for images, labels in tqdm(loader):
         images = images.to(device)
         labels = labels.to(device)
         # features = self.clip_model.encode_image(images.to(device))
 
         similarity_x_logis = clipzs.model_inference(images)
-        outputs = similarity_x_logis.softmax(dim=-1)
-        hits += (outputs.argmax(-1) == labels).sum().item()
-        total += labels.shape[0]
+        _, preds = similarity_x_logis.max(1)
+        hits = preds.eq(labels).sum().item()
+        accuracy = hits / images.size(0)
+        top1.update(accuracy, images.size(0))
 
-        top1.update(hits / total, total)
+        #outputs = similarity_x_logis.softmax(dim=-1)
+        #hits += (outputs.argmax(-1) == labels).sum().item()
+        #total += labels.shape[0]
+
+        #top1.update(hits / total, total)
     #######################
     # END OF YOUR CODE    #
     #######################

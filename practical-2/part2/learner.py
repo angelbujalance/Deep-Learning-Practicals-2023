@@ -69,14 +69,14 @@ class Learner:
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        # Turn off gradients in both the image and the text encoder
+        # Turn off gradients in both the image and the text encoder  ¿?
         # Note: You need to keep the visual/deep prompt's parameters trainable
         # Hint: Check for "prompt_learner" and "deep_prompt" in the parameters' names
 
-        for name, param in self.clip.named_parameters():
-            if "prompt_learner" not in name and "deep_prompt" not in name:
+        for name, param in self.clip.named_parameters():  
+            if 'prompt_learner' not in name and 'deep_prompt' not in name:
                 param.requires_grad = False
-
+            
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -96,13 +96,13 @@ class Learner:
         self.clip.to(self.device)
 
         # Define criterion and optimizer
+        print('lr=', args.learning_rate,'momentum=', args.momentum, 'weight_decay=', args.weight_decay)
         self.optimizer = torch.optim.SGD(
             filter(lambda p: p.requires_grad, self.clip.parameters()),
             lr=args.learning_rate,
             momentum=args.momentum,
             weight_decay=args.weight_decay,
         )
-
         self.criterion = nn.CrossEntropyLoss()
         self.scaler = GradScaler()
 
@@ -133,11 +133,7 @@ class Learner:
                 self.clip.prompt_learner.load_state_dict(checkpoint["state_dict"])
             else:
                 self.clip.load_state_dict(checkpoint["state_dict"])
-            print(
-                "=> loaded checkpoint '{}' (epoch {})".format(
-                    self.args.resume, checkpoint["epoch"]
-                )
-            )
+            print("=> loaded checkpoint '{}' (epoch {})".format(self.args.resume, checkpoint["epoch"]))
         else:
             print("=> no checkpoint found at '{}'".format(self.args.resume))
 
@@ -222,33 +218,42 @@ class Learner:
             # PUT YOUR CODE HERE  #
             #######################
 
-            # TODO: Implement the training step for a single batch
+            # Implement the training step for a single batch
 
-            # training step for a single batch
-
+            # Steps ( your usual training loop :) ):
             # - Set the gradients to zero
             self.optimizer.zero_grad()
 
             # - Move the images/targets to the device
             images = images.to(self.device)
             target = target.to(self.device)
-
+            
             # - Perform a forward pass (using self.clip)
-            output = self.clip.forward(images)
-
+            output = self.clip(images)
+        
             # - Compute the loss (using self.criterion)
-            loss = self.criterion(output, target)
-            loss.requires_grad = True
+            output = self.clip.forward(images)
+            target = target.to(torch.long)
+            output = output.to(torch.float32)
+            
+            
+            loss = self.criterion(output, target) #Defined in initialization as CrossEntropy
+            #loss.requires_grad = True
 
             # - Perform a backward pass
             loss.backward()
 
             # - Update the parameters
             self.optimizer.step()
-
+            
             #######################
             # END OF YOUR CODE    #
             #######################
+
+            # Note: we clamp to 4.6052 = ln(100), as in the original paper.
+            #self.clip.logit_scale.data = torch.clamp(
+             #   self.clip.logit_scale.data, 0, 4.6052
+            #)
 
             # Measure accuracy
             acc1 = accuracy(output, target, topk=(1,))
@@ -300,6 +305,7 @@ class Learner:
 
                 # Implement the evaluation step for a single batch
 
+                # Steps ( your usual evaluation loop :) ):
                 # - Move the images/targets to the device
                 images = images.to(self.device)
                 target = target.to(self.device)
@@ -308,7 +314,7 @@ class Learner:
                 output = self.clip(images)
 
                 # - Compute the loss (using self.criterion)
-                loss = self.criterion(output, target)
+                loss = self.criterion(output, target) #Defined in initialization as CrossEntropy
 
                 #######################
                 # END OF YOUR CODE    #
