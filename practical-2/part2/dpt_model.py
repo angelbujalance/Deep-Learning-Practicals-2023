@@ -160,6 +160,8 @@ class DeepPromptCLIP(nn.Module):
         # - Inject the deep prompt at the specified layer (self.injection_layer).
 
         # Hint: Beware of the batch size (the deep prompt is the same for all images in the batch).
+        deep_prompt_dtype = x.dtype
+        self.deep_prompt = nn.Parameter(self.deep_prompt.data.to(deep_prompt_dtype))
 
         for i, resblock in enumerate(image_encoder.transformer.resblocks):
             if i == self.injection_layer:
