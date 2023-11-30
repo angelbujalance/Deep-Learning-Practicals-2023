@@ -74,7 +74,7 @@ class Learner:
         # Hint: Check for "prompt_learner" and "deep_prompt" in the parameters' names
 
         for name, param in self.clip.named_parameters():
-            if not name.startswith('prompt_learner.'):
+            if "prompt_learner" not in name and "deep_prompt" not in name:
                 param.requires_grad = False
 
         #######################
