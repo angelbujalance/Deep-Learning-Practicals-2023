@@ -108,10 +108,15 @@ class PadPrompter(nn.Module):
         # - It is always advisable to implement and then visualize if
         #   your prompter does what you expect it to do.
 
+        #x[:, :, :self.pad_up.size(2), :] += self.pad_up
+        #x[:, :, -self.pad_down.size(2):, :] += self.pad_down
+        #x[:, :, self.pad_size:-self.pad_size, :self.pad_size] += self.pad_left
+        #x[:, :, self.pad_size:-self.pad_size, -self.pad_size:] += self.pad_right
+
         x[:, :, :self.pad_up.size(2), :] += self.pad_up
         x[:, :, -self.pad_down.size(2):, :] += self.pad_down
-        x[:, :, self.pad_size:-self.pad_size, :self.pad_size] += self.pad_left
-        x[:, :, self.pad_size:-self.pad_size, -self.pad_size:] += self.pad_right
+        x[:, :, self.pad_left.size(3):(x(2) - self.pad_left.size(3)), :self.pad_left.size(3)] += self.pad_left
+        x[:, :, self.pad_left.size(3):(x(2) - self.pad_left.size(3)), -self.pad_right.size(3):] += self.pad_right
 
         return x
         #######################
