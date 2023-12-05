@@ -35,8 +35,9 @@ def sample_reparameterize(mean, std):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    z = None
-    raise NotImplementedError
+    sample_noise = torch.rand_like(mean)
+    z = mean + std * sample_noise
+    #raise NotImplementedError
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -58,7 +59,8 @@ def KLD(mean, log_std):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    KLD = None
+    KL = torch.exp(torch.mul(2, log_std)) + torch.pow(mean, 2) - torch.ones_like(mean) - torch.mul(2, log_std)
+    KLD = torch.mul(0.5, torch.sum(KL, dim=-1))
     raise NotImplementedError
     #######################
     # END OF YOUR CODE    #
