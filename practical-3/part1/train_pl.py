@@ -52,7 +52,7 @@ class VAE(pl.LightningModule):
         Inputs:
             imgs - Batch of images of shape [B,C,H,W].
                    The input images are converted to 4-bit, i.e. integers between 0 and 15.
-        Ouptuts:
+        Outputs:
             L_rec - The average reconstruction loss of the batch. Shape: single scalar
             L_reg - The average regularization loss (KLD) of the batch. Shape: single scalar
             bpd - The average bits per dimension metric of the batch.
@@ -63,17 +63,32 @@ class VAE(pl.LightningModule):
         # - Implement the empty functions in utils.py before continuing
         # - The forward run consists of encoding the images, sampling in
         #   latent space, and decoding.
-        # - By default, torch.nn.functional.cross_entropy takes the mean accross
+        # - By default, torch.nn.functional.cross_entropy takes the mean across
         #   all axes. Do not forget to change the 'reduction' parameter to
         #   make it consistent with the loss definition of the assignment.
 
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        L_rec = None
-        L_reg = None
-        bpd = None
-        raise NotImplementedError
+        # Obtain the mean and the log_std from the encoder
+        mean, log_std = self.encoder(imgs)
+        img_shape = imgs.shape
+
+        # Sample reparametrization
+        std = log_std.exp()
+        z = sample_reparameterize(mean, std)
+
+        # Apply the decoder to z
+        x = self.decoder(z)
+
+        # Computes L_rec L_reg
+        imgs = imgs.squeeze(1)
+        L_rec = F.cross_entropy(x, imgs) / x.shape[0]
+        L_reg = KLD(mean, log_std).mean()
+
+        # Computes elbo and bpd
+        elbo = L_rec + L_reg
+        bpd = elbo_to_bpd(elbo, img_shape)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -91,8 +106,8 @@ class VAE(pl.LightningModule):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        x_samples = None
-        raise NotImplementedError
+        z = torch.randn(batch_size, self.z_dim)
+        x_samples = self.decoder(z).softmax(1)
         #######################
         # END OF YOUR CODE    #
         #######################
