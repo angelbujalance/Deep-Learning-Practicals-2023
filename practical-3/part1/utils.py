@@ -37,7 +37,6 @@ def sample_reparameterize(mean, std):
     #######################
     sample_noise = torch.rand_like(mean)
     z = mean + std * sample_noise
-    #raise NotImplementedError
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -111,8 +110,23 @@ def visualize_manifold(decoder, grid_size=20):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    img_grid = None
-    raise NotImplementedError
+    # Range [0.5/grid_size, 1.5/grid_size, ..., (grid_size-0.5)/grid_size] for the percentiles.
+    percentiles = torch.linspace(start=0.5/grid_size,
+                                 end=grid_size-0.5/grid_size,
+                                 steps=grid_size)
+
+    # Icdf method of the torch normal distribution to obtain z values at percentiles.
+    z_percentiles = torch.distributions.Normal(0, 1).icdf(percentiles)
+
+    # Grid of values
+    meshgrid = torch.meshgrid(z_percentiles)
+
+    # Apply a softmax after the decoder
+    x = decoder(torch.stack(meshgrid, dim=-1)).softmax(1)
+
+    # - Combine the grid_size**2 images into a grid
+    img_grid = make_grid(x.unsqueeze(1), nrow=grid_size)
+    #raise NotImplementedError
     #######################
     # END OF YOUR CODE    #
     #######################
