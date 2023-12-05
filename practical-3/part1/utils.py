@@ -61,7 +61,7 @@ def KLD(mean, log_std):
     #######################
     KL = torch.exp(torch.mul(2, log_std)) + torch.pow(mean, 2) - torch.ones_like(mean) - torch.mul(2, log_std)
     KLD = torch.mul(0.5, torch.sum(KL, dim=-1))
-    raise NotImplementedError
+    #raise NotImplementedError
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -80,8 +80,7 @@ def elbo_to_bpd(elbo, img_shape):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    bpd = None
-    raise NotImplementedError
+    bpd = elbo * torch.log2(torch.e) * 1/(torch.prod(torch.tensor(img_shape[1:])))
     #######################
     # END OF YOUR CODE    #
     #######################
