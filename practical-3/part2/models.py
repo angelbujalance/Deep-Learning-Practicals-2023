@@ -34,7 +34,27 @@ class ConvEncoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        raise NotImplementedError
+        self.z_dim = z_dim
+        num_channels = 1 # because MNIST images are black and white
+        self.net = nn.Sequential(
+            nn.Conv2d(num_channels, num_channels, kernel_size=3,
+                      padding=1, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(num_channels, num_channels,
+                      kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(num_channels, 2 * num_channels,
+                      kernel_size=3, padding=1, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(2 * num_channels, 2 * num_channels,
+                      kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(2 * num_channels, 2 * num_channels,
+                      kernel_size=3, padding=1, stride=2),
+            nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(2 * 16 * num_channels, z_dim)
+        )
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -49,8 +69,9 @@ class ConvEncoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        x = None
-        raise NotImplementedError
+        x = x.reshape(x.shape[0], self.z_dim) # or x = x.reshape(x.shape[0], self.num_input_channels, 28, 28)
+        z = self.net(x)
+        #raise NotImplementedError
         #######################
         # END OF YOUR CODE    #
         #######################
