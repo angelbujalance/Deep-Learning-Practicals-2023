@@ -60,7 +60,6 @@ def KLD(mean, log_std):
     #######################
     KL = torch.exp(torch.mul(2, log_std)) + torch.pow(mean, 2) - torch.ones_like(mean) - torch.mul(2, log_std)
     KLD = torch.mul(0.5, torch.sum(KL, dim=-1))
-    #raise NotImplementedError
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -126,7 +125,6 @@ def visualize_manifold(decoder, grid_size=20):
 
     # - Combine the grid_size**2 images into a grid
     img_grid = make_grid(x.unsqueeze(1), nrow=grid_size)
-    #raise NotImplementedError
     #######################
     # END OF YOUR CODE    #
     #######################

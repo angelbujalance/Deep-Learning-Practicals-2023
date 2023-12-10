@@ -75,7 +75,7 @@ class VAE(pl.LightningModule):
         img_shape = imgs.shape
 
         # Sample reparametrization
-        std = log_std.exp()
+        std = torch.exp(log_std)
         z = sample_reparameterize(mean, std)
 
         # Apply the decoder to z
@@ -83,8 +83,8 @@ class VAE(pl.LightningModule):
 
         # Computes L_rec L_reg
         imgs = imgs.squeeze(1)
-        L_rec = F.cross_entropy(x, imgs) / x.shape[0]
-        L_reg = KLD(mean, log_std).mean()
+        L_rec = torch.mean(torch.sum(F.cross_entropy(x, imgs, reduction='none'), (1, 2)))
+        L_reg = torch.mean(KLD(mean, log_std))
 
         # Computes elbo and bpd
         elbo = L_rec + L_reg
@@ -108,6 +108,7 @@ class VAE(pl.LightningModule):
         #######################
         z = torch.randn(batch_size, self.z_dim)
         x_samples = self.decoder(z).softmax(1)
+
         #######################
         # END OF YOUR CODE    #
         #######################

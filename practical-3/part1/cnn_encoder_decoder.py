@@ -50,10 +50,11 @@ class CNNEncoder(nn.Module):
             nn.Conv2d(2 * num_filters, 2 * num_filters, kernel_size=3, padding=1, stride=2),
             nn.GELU(),
             nn.Flatten(),
-            nn.Linear(2 * 16 * num_filters, z_dim)
         )
-
+        self.mean = nn.Linear(2 * 16 * num_filters, z_dim)
+        self.log_std = nn.Linear(2 * 16 * num_filters, z_dim)
         self.z_dim = z_dim
+        self.num_filters = num_filters
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -71,8 +72,10 @@ class CNNEncoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        mean = x.reshape(x.shape[0], self.z_dim).mean(dim=1)
-        log_std = torch.log(x.reshape(x.shape[0], self.z_dim).std(dim=1))
+        x = self.net(x)
+
+        mean = self.mean(x)
+        log_std = self.log_std(x)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -105,23 +108,27 @@ class CNNDecoder(nn.Module):
         )
 
         self.net = nn.Sequential(
+            # 1st convolution
             nn.ConvTranspose2d(2 * num_filters, 2 * num_filters,
-                               kernel_size=3, output_padding=1,
+                               kernel_size=3, output_padding=0,
                                padding=1, stride=2),
             nn.GELU(),
+            # 2nd convolution
             nn.Conv2d(2 * num_filters, 2 * num_filters,
                       kernel_size=3, padding=1),
             nn.GELU(),
+            # 3rd convolution
             nn. ConvTranspose2d(2 * num_filters, num_filters,
                                 kernel_size=3, output_padding=1,
                                 padding=1, stride=2),
             nn.GELU(),
+            # 4th convolution
             nn.Conv2d(num_filters, num_filters, kernel_size=3, padding=1),
             nn.GELU(),
+            # 5th convolution
             nn.ConvTranspose2d(num_filters, num_input_channels,
                                kernel_size=3, output_padding=1,
                                padding=1, stride=2),
-            nn.Tanh() # The input images is scaled between -1 and 1, hence the output has to be bounded as well
         )
         #######################
         # END OF YOUR CODE    #
@@ -141,7 +148,7 @@ class CNNDecoder(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         x = self.Linear(z)
-        x = x.reshape(x.shape[0], self.num_input_channels, 28, 28) #x = x.reshape(x.shape[0], -1, 4, 4) # or x = x.reshape(x.shape[0], self.num_input_channels, 28, 28)
+        x = x.reshape(x.shape[0], -1, 4, 4) # x = x.reshape(x.shape[0], -1, 4, 4) # or x = x.reshape(x.shape[0], self.num_input_channels, 28, 28)
         x = self.net(x)
         #######################
         # END OF YOUR CODE    #
