@@ -98,6 +98,7 @@ class CNNDecoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        self.num_input_channels = num_input_channels
         self.Linear = nn.Sequential(
             nn.Linear(z_dim, 2 * 16 * num_filters),
             nn.GELU()
@@ -139,8 +140,8 @@ class CNNDecoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        x = self.linear(z)
-        x = x.reshape(x.shape[0], -1, 4, 4) # or x = x.reshape(x.shape[0], self.num_input_channels, 28, 28)
+        x = self.Linear(z)
+        x = x.reshape(x.shape[0], self.num_input_channels, 28, 28) #x = x.reshape(x.shape[0], -1, 4, 4) # or x = x.reshape(x.shape[0], self.num_input_channels, 28, 28)
         x = self.net(x)
         #######################
         # END OF YOUR CODE    #
