@@ -90,7 +90,18 @@ class CausalSelfAttention(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        raise NotImplementedError
+        # Calculate attention weights using key and queries
+        att_w = torch.matmul(q, k.transpose(2, 3))
+
+        # Mask the calculated attention weights with the mask parameter.
+        mask_att_w = att_w.masked_fill(self.mask[:, :, :seq_len, :seq_len] == 0, (-torch.inf))
+        mask_att_w = F.softmax(mask_att_w, dim=3)
+
+        # Apply dropout to the weigths
+        att_w_dropout = self.attn_dropout(mask_att_w)
+
+        # Apply attention to the values
+        y = torch.matmul(att_w_dropout, v)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -392,7 +403,24 @@ class GPT(nn.Module):
             #######################
             # PUT YOUR CODE HERE  #
             #######################
-            raise NotImplementedError
+            logits = self.forward(idx_cond)
+
+            logits = logits[:, -1, :] / temperature
+
+            if top_k:
+                k_elements, _ = torch.topk(logits, top_k)
+                min_value = k_elements[:, -1]
+                logits = torch.where(logits < min_value.unsqueeze(-1),
+                                     torch.ones_like(logits, dtype=logits.dtype))
+
+            probabilities = F.softmax(logits, dim=-1)
+
+            if do_sample:
+                sample = torch.multinomial(probabilities, num_samples=1).long()
+            else:
+                sample = torch.argmax(probabilities, dim=-1, keepdim=True)
+
+            idx = torch.cat(tensors=[idx, sample], dim=-1)
             #######################
             # END OF YOUR CODE    #
             #######################
