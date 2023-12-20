@@ -50,6 +50,7 @@ class CNNEncoder(nn.Module):
             nn.Conv2d(2 * num_filters, 2 * num_filters, kernel_size=3, padding=1, stride=2),
             nn.GELU(),
             nn.Flatten(),
+            nn.Linear(2 * 16 * num_filters, 2 * z_dim)
         )
         self.mean = nn.Linear(2 * 16 * num_filters, z_dim)
         self.log_std = nn.Linear(2 * 16 * num_filters, z_dim)
@@ -74,8 +75,8 @@ class CNNEncoder(nn.Module):
         #######################
         x = self.net(x)
 
-        mean = self.mean(x)
-        log_std = self.log_std(x)
+        mean, log_std = x[:, :self.z_dim], x[:, self.z_dim:]
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -129,6 +130,7 @@ class CNNDecoder(nn.Module):
             nn.ConvTranspose2d(num_filters, num_input_channels,
                                kernel_size=3, output_padding=1,
                                padding=1, stride=2),
+            #nn.Linear(2 * 16 * num_filters, 2 * z_dim)
         )
         #######################
         # END OF YOUR CODE    #

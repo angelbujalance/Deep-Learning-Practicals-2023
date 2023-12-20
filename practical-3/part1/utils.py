@@ -35,13 +35,11 @@ def sample_reparameterize(mean, std):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    sample_noise = torch.rand_like(mean)
-    z = mean + std * sample_noise
+    z = mean + std * torch.randn_like(mean)
     #######################
     # END OF YOUR CODE    #
     #######################
     return z
-
 
 def KLD(mean, log_std):
     """

@@ -64,3 +64,4 @@ def mnist(root='../data/', batch_size=128, num_workers=4, download=True):
         drop_last=False)
 
     return train_loader, val_loader, test_loader
+
